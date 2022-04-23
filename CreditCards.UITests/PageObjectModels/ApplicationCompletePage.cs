@@ -4,14 +4,14 @@ using OpenQA.Selenium.Support.UI;
 
 namespace CreditCards.UITests.PageObjectModels;
 
-public class HomePage
+public class ApplicationCompletePage
 {
     private readonly IWebDriver _driver;
 
-    public static readonly string Url = "http://localhost:5000/";
-    public static readonly string Title = "Home Page - Credit Cards";
+    public static readonly string Url = "http://localhost:5000/Apply";
+    public static readonly string Title = "Application Complete - Credit Cards";
 
-    public HomePage(IWebDriver driver)
+    public ApplicationCompletePage(IWebDriver driver)
     {
         _driver = driver;
     }
@@ -65,18 +65,52 @@ public class HomePage
         _driver.FindElement(By.Id("LiveChat")).Click();
     }
 
-    public ApplicationPage ClickApplyLowRateLink()
+    public void EnterFirstName(string firstName)
     {
-        _driver.FindElement(By.Name("ApplyLowRate")).Click();
-        return new ApplicationPage(_driver);
+        _driver.FindElement(By.Id("FirstName")).SendKeys(firstName);
     }
 
-    public ApplicationPage WaitForEasyApplicationCarouselPage()
+    public void EnterLastName(string lastName)
     {
-        var wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(35));
-        var applyLink = wait.Until(ExpectedConditions.ElementToBeClickable
-            (By.ClassName("customer-service-apply-now")));
-        applyLink.Click();
-        return new ApplicationPage(_driver);
+        _driver.FindElement(By.Id("LastName")).SendKeys(lastName);
+    }
+
+    public void EnterFrequentFlyerNumber(string frequentFlyerNumber)
+    {
+        _driver.FindElement(By.Id("FrequentFlyerNumber")).SendKeys(frequentFlyerNumber);
+    }
+
+    public void EnterAge(string age)
+    {
+        _driver.FindElement(By.Id("Age")).SendKeys(age);
+    }
+
+    public void SelectMaritalStatusSingle()
+    {
+        _driver.FindElement(By.Id("Single")).Click();
+    }
+
+    public void SelectBusinessSourceTv()
+    {
+        var businessSourceElement = _driver.FindElement(By.Id("BusinessSource"));
+        var businessSource = new SelectElement(businessSourceElement);
+        businessSource.SelectByValue("TV");
+
+        _driver.FindElement(By.Id("Single")).Click();
+    }
+
+    public void AcceptTerms()
+    {
+        _driver.FindElement(By.Id("TermsAccepted")).Click();
+    }
+
+    public void SetGrossAnnualIncome(string grossIncome)
+    {
+        _driver.FindElement(By.Id("GrossAnnualIncome")).SendKeys(grossIncome);
+    }
+
+    public void SubmitForm()
+    {
+        _driver.FindElement(By.Id("TermsAccepted")).Submit();
     }
 }
