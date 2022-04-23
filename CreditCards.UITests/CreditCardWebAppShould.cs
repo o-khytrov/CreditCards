@@ -1,4 +1,5 @@
-﻿using OpenQA.Selenium;
+﻿using CreditCards.UITests.PageObjectModels;
+using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 using Xunit;
 
@@ -6,10 +7,7 @@ namespace CreditCards.UITests;
 
 public class CreditCardWebAppShould
 {
-    private const string HomeUrl = "http://localhost:5258/";
-
-    private const string AboutUrl = "http://localhost:5258/Home/About";
-
+    private const string AboutUrl = "http://localhost:5000/Home/About"; 
     private const string HomePageCreditCards = "Home Page - Credit Cards";
 
     [Fact]
@@ -17,25 +15,8 @@ public class CreditCardWebAppShould
     public void LoadApplicationPage()
     {
         using IWebDriver driver = new ChromeDriver();
-        driver.Navigate().GoToUrl(HomeUrl);
-        Assert.Equal(HomePageCreditCards, driver.Title);
-        Assert.Equal(HomeUrl, driver.Url);
-    }
-
-    [Fact]
-    [Trait("Category", "Smoke")]
-    public void ReloadHomePage()
-    {
-        using IWebDriver driver = new ChromeDriver();
-        driver.Navigate().GoToUrl(HomeUrl);
-        var generationTokenElement = driver.FindElement(By.Id("GenerationToken"));
-        Assert.Equal(HomePageCreditCards, driver.Title);
-        Assert.Equal(HomeUrl, driver.Url);
-        driver.Navigate().Refresh();
-        Assert.Equal(HomePageCreditCards, driver.Title);
-        Assert.Equal(HomeUrl, driver.Url);
-        var generationTokenElementRefreshed = driver.FindElement(By.Id("GenerationToken"));
-        Assert.NotEqual(generationTokenElement, generationTokenElementRefreshed);
+        var homePage = new HomePage(driver);
+        homePage.NavigateTo();
     }
 
     [Fact]
@@ -43,11 +24,16 @@ public class CreditCardWebAppShould
     public void ReloadHomePageOnBack()
     {
         using IWebDriver driver = new ChromeDriver();
-        driver.Navigate().GoToUrl(HomeUrl);
+        var homePage = new HomePage(driver);
+        homePage.NavigateTo();
+        var initialToken = homePage.GenerationToken;
+
         driver.Navigate().GoToUrl(AboutUrl);
         driver.Navigate().Back();
-        Assert.Equal(HomePageCreditCards, driver.Title);
-        Assert.Equal(HomeUrl, driver.Url);
+
+        homePage.EnsurePageLoaded();
+
+        Assert.NotEqual(initialToken, homePage.GenerationToken);
     }
 
     [Fact]
@@ -56,10 +42,10 @@ public class CreditCardWebAppShould
     {
         using IWebDriver driver = new ChromeDriver();
         driver.Navigate().GoToUrl(AboutUrl);
-        driver.Navigate().GoToUrl(HomeUrl);
+        driver.Navigate().GoToUrl(HomePage.Url);
         driver.Navigate().Back();
         driver.Navigate().Forward();
         Assert.Equal(HomePageCreditCards, driver.Title);
-        Assert.Equal(HomeUrl, driver.Url);
+        Assert.Equal(HomePage.Url, driver.Url);
     }
 }

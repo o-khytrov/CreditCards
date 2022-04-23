@@ -1,6 +1,6 @@
 using ApprovalTests;
 using ApprovalTests.Reporters;
-using ApprovalTests.Reporters.Windows;
+using CreditCards.UITests.PageObjectModels;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Support.UI;
@@ -12,12 +12,9 @@ namespace CreditCards.UITests;
 [Trait("Category", "Application")]
 public class CreditCardApplicationShould
 {
-    private const string HomeUrl = "http://localhost:5000/";
-
     private const string ApplyUrl = "http://localhost:5000/Apply";
     private const string AboutUrl = "http://localhost:5000/Home/About";
     private const string ApplyLowRateTitle = "Credit Card Application - Credit Cards";
-    private const string HomeTitle = "Home Page - Credit Cards";
 
     private readonly ITestOutputHelper _output;
 
@@ -30,7 +27,7 @@ public class CreditCardApplicationShould
     public void BeInitiatedFromPage_NewLoad()
     {
         using var driver = new ChromeDriver();
-        driver.Navigate().GoToUrl(HomeUrl);
+        driver.Navigate().GoToUrl(HomePage.Url);
         var applyLink = driver.FindElement(By.Name("ApplyLowRate"));
         applyLink.Click();
         Assert.Equal(ApplyLowRateTitle, driver.Title);
@@ -41,7 +38,7 @@ public class CreditCardApplicationShould
     public void BeInitiatedFromPage_RandomGreeting_UsingXPath()
     {
         using var driver = new ChromeDriver();
-        driver.Navigate().GoToUrl(HomeUrl);
+        driver.Navigate().GoToUrl(HomePage.Url);
         var applyLink = driver.FindElement(By.XPath("/html/body/div/div[4]/div/p/a"));
         applyLink.Click();
         Assert.Equal(ApplyLowRateTitle, driver.Title);
@@ -53,7 +50,7 @@ public class CreditCardApplicationShould
     public void BeInitiatedFromPage_EasyApplication()
     {
         using var driver = new ChromeDriver();
-        driver.Navigate().GoToUrl(HomeUrl);
+        driver.Navigate().GoToUrl(HomePage.Url);
         var carouselNext = driver.FindElement(By.CssSelector("[data-slide='next']"));
         carouselNext.Click();
         var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(1));
@@ -67,7 +64,7 @@ public class CreditCardApplicationShould
     public void BeInitiatedFromPage_EasyApplication_PrebuiltConditions()
     {
         using var driver = new ChromeDriver();
-        driver.Navigate().GoToUrl(HomeUrl);
+        driver.Navigate().GoToUrl(HomePage.Url);
         var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(35));
         var applyLink = wait.Until(ExpectedConditions.ElementToBeClickable
             (By.ClassName("customer-service-apply-now")));
@@ -80,10 +77,10 @@ public class CreditCardApplicationShould
     public void DisplayProductsAndRates()
     {
         using var driver = new ChromeDriver();
-        driver.Navigate().GoToUrl(HomeUrl);
-        var cell = driver.FindElement(By.TagName("td"));
-        var fistProduct = cell.Text;
-        Assert.Equal("Easy Credit Card", fistProduct);
+        var homePage = new HomePage(driver);
+        homePage.NavigateTo();
+        Assert.Equal("Easy Credit Card", homePage.ProductCells[0].name);
+        Assert.Equal("20% APR", homePage.ProductCells[0].interestRate);
     }
 
     [Fact]
@@ -162,10 +159,10 @@ public class CreditCardApplicationShould
     public void OpenContactFooterLinkInNewTab()
     {
         using var driver = new ChromeDriver();
-        driver.Navigate().GoToUrl(HomeUrl);
-        driver.FindElementById("ContactFooter").Click();
+        var homePage = new HomePage(driver);
+        homePage.NavigateTo();
+        homePage.ClickContactFooterLink();
         var allTabs = driver.WindowHandles;
-        var homepaPageTab = allTabs[0];
         var contactPageTab = allTabs[1];
         driver.SwitchTo().Window(contactPageTab);
         Assert.EndsWith("/Home/Contact", driver.Url);
@@ -175,8 +172,10 @@ public class CreditCardApplicationShould
     public void AlertIfLiveChatClosed()
     {
         using var driver = new ChromeDriver();
-        driver.Navigate().GoToUrl(HomeUrl);
-        driver.FindElementById("LiveChat").Click();
+        var homePage = new HomePage(driver);
+        homePage.NavigateTo();
+        homePage.ClickLiveChatLink();
+        
         var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(5));
         var alert = wait.Until(ExpectedConditions.AlertIsPresent());
         Assert.Equal("Live chat is currently closed.", alert.Text);
@@ -187,19 +186,19 @@ public class CreditCardApplicationShould
     public void NotNavigateToAboutUsPageWhenCancelClicked()
     {
         using var driver = new ChromeDriver();
-        driver.Navigate().GoToUrl(HomeUrl);
+        driver.Navigate().GoToUrl(HomePage.Url);
         driver.FindElementById("LearnAboutUs").Click();
         var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(5));
         var alert = wait.Until(ExpectedConditions.AlertIsPresent());
         alert.Dismiss();
-        Assert.Equal(HomeTitle, driver.Title);
+        Assert.Equal(HomePage.Title, driver.Title);
     }
 
     [Fact]
     public void NotDisplayCookieUseMessage()
     {
         using var driver = new ChromeDriver();
-        driver.Navigate().GoToUrl(HomeUrl);
+        driver.Navigate().GoToUrl(HomePage.Url);
         driver.Manage().Cookies.AddCookie(new Cookie("acceptedCookies", "true"));
         driver.Navigate().Refresh();
         var message = driver.FindElementsById("CookiesBeingUsed");
