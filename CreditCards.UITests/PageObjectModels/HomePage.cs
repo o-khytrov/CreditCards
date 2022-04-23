@@ -35,11 +35,18 @@ public class HomePage
     public string GenerationToken => _driver.FindElement(By.Id("GenerationToken")).Text;
 
     public void ClickContactFooterLink() => _driver.FindElement(By.Id("ContactFooter")).Click();
+    public void ClickContactLearnAboutUsLink() => _driver.FindElement(By.Id("LearnAboutUs")).Click();
+    public bool IsCookieMessagePresent () => _driver.FindElements(By.Id("CookiesBeingUsed")).Any();
 
     public void NavigateTo()
     {
         _driver.Navigate().GoToUrl(Url);
         EnsurePageLoaded();
+    }
+
+    public void Refresh()
+    {
+        _driver.Navigate().Refresh();
     }
 
     public void EnsurePageLoaded()

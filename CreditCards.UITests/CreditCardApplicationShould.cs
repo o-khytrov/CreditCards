@@ -175,7 +175,7 @@ public class CreditCardApplicationShould
         var homePage = new HomePage(driver);
         homePage.NavigateTo();
         homePage.ClickLiveChatLink();
-        
+
         var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(5));
         var alert = wait.Until(ExpectedConditions.AlertIsPresent());
         Assert.Equal("Live chat is currently closed.", alert.Text);
@@ -186,8 +186,9 @@ public class CreditCardApplicationShould
     public void NotNavigateToAboutUsPageWhenCancelClicked()
     {
         using var driver = new ChromeDriver();
-        driver.Navigate().GoToUrl(HomePage.Url);
-        driver.FindElementById("LearnAboutUs").Click();
+        var homePage = new HomePage(driver);
+        homePage.NavigateTo();
+        homePage.ClickContactLearnAboutUsLink();
         var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(5));
         var alert = wait.Until(ExpectedConditions.AlertIsPresent());
         alert.Dismiss();
@@ -198,11 +199,11 @@ public class CreditCardApplicationShould
     public void NotDisplayCookieUseMessage()
     {
         using var driver = new ChromeDriver();
-        driver.Navigate().GoToUrl(HomePage.Url);
+        var homePage = new HomePage(driver);
+        homePage.NavigateTo();
         driver.Manage().Cookies.AddCookie(new Cookie("acceptedCookies", "true"));
-        driver.Navigate().Refresh();
-        var message = driver.FindElementsById("CookiesBeingUsed");
-        Assert.Empty(message);
+        homePage.Refresh();
+        Assert.False(homePage.IsCookieMessagePresent());
     }
 
     [Fact]
